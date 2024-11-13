@@ -60,3 +60,233 @@ Train both Logistic Regression and SVM.
 Compute accuracy for each model.
 Plot decision boundaries for Logistic Regression and SVM to visually compare them.
 
+and problem2 :
+2D SVM with streamlit deployment (3D plot) -dataset 分布在feature plane上圓形
+label display use english, tks
+ChatGPT 說：
+ChatGPT
+記憶已更新
+Here’s an example of using a 2D SVM model with a 3D plot for visualizing the decision boundary. This code uses Streamlit for deployment and matplotlib for 3D plotting. The dataset will be distributed in a circular shape on the feature plane.
+
+First, make sure to install Streamlit:
+
+bash
+複製程式碼
+pip install streamlit
+Then, use the following code:
+
+python
+複製程式碼
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.svm import SVC
+from mpl_toolkits.mplot3d import Axes3D
+import streamlit as st
+
+# Generate circular data distribution
+np.random.seed(0)
+num_samples = 100
+radius = np.random.rand(num_samples) * 2
+angle = 2 * np.pi * np.random.rand(num_samples)
+X = np.c_[radius * np.cos(angle), radius * np.sin(angle)]
+y = (radius > 1).astype(int)  # Label: inside circle (0) or outside (1)
+
+# Train SVM model with RBF kernel for circular decision boundary
+svm_model = SVC(kernel='rbf', C=1, gamma='auto')
+svm_model.fit(X, y)
+
+# Create a 3D plot for decision boundary
+def plot_3d_svm():
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection='3d')
+    
+    # Scatter plot of original data
+    ax.scatter(X[y == 0, 0], X[y == 0, 1], 0, color='blue', label="Class 0")
+    ax.scatter(X[y == 1, 0], X[y == 1, 1], 0, color='red', label="Class 1")
+    
+    # Generate grid for decision boundary plot
+    x = np.linspace(-2, 2, 50)
+    y = np.linspace(-2, 2, 50)
+    X1, X2 = np.meshgrid(x, y)
+    Z = svm_model.decision_function(np.c_[X1.ravel(), X2.ravel()])
+    Z = Z.reshape(X1.shape)
+    
+    # Plot decision surface
+    ax.plot_surface(X1, X2, Z, color='green', alpha=0.3, edgecolor='none')
+    
+    ax.set_xlabel("Feature 1")
+    ax.set_ylabel("Feature 2")
+    ax.set_zlabel("Decision Boundary")
+    ax.set_title("2D SVM with Circular Data Distribution")
+    ax.legend()
+    
+    return fig
+
+# Streamlit deployment
+st.title("2D SVM Decision Boundary (Circular Data)")
+st.pyplot(plot_3d_svm())
+Explanation:
+Data Generation: The data is distributed in a circular pattern on the feature plane using polar coordinates.
+SVM Training: An SVM model with an RBF kernel is trained to classify points inside and outside the circle.
+3D Plot: The decision boundary is visualized in 3D, with the z-axis representing the SVM decision function value.
+Streamlit: The 3D plot is displayed in a Streamlit app.
+To run this code in Streamlit, save it to a file (e.g., svm_3d_streamlit.py) and run:
+
+bash
+複製程式碼
+streamlit run svm_3d_streamlit.py
+This will start a local Streamlit server where you can view the interactive 3D plot in your browser. Let me know if you need further customization!
+
+
+
+
+
+
+你說：
+its error on the page
+
+UnboundLocalError: cannot access local variable 'y' where it is not associated with a value
+Traceback:
+File "C:\Users\Dyc\AppData\Roaming\Python\Python312\site-packages\streamlit\runtime\scriptrunner\exec_code.py", line 88, in exec_func_with_error_handling
+    result = func()
+             ^^^^^^
+File "C:\Users\Dyc\AppData\Roaming\Python\Python312\site-packages\streamlit\runtime\scriptrunner\script_runner.py", line 579, in code_to_exec
+    exec(code, module.__dict__)
+File "C:\Users\Dyc\Desktop\AI_HW3\hw3_2.py", line 48, in <module>
+    st.pyplot(plot_3d_svm())
+              ^^^^^^^^^^^^^
+File "C:\Users\Dyc\Desktop\AI_HW3\hw3_2.py", line 25, in plot_3d_svm
+    ax.scatter(X[y == 0, 0], X[y == 0, 1], 0, color='blue', label="Class 0")
+                 ^
+ChatGPT 說：
+ChatGPT
+The error message indicates that the variable y is not accessible inside the plot_3d_svm function. This is likely because y is defined outside the function, so we need to pass X and y as parameters to the function.
+
+Here's the corrected version of the code:
+
+python
+複製程式碼
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.svm import SVC
+from mpl_toolkits.mplot3d import Axes3D
+import streamlit as st
+
+# Generate circular data distribution
+np.random.seed(0)
+num_samples = 100
+radius = np.random.rand(num_samples) * 2
+angle = 2 * np.pi * np.random.rand(num_samples)
+X = np.c_[radius * np.cos(angle), radius * np.sin(angle)]
+y = (radius > 1).astype(int)  # Label: inside circle (0) or outside (1)
+
+# Train SVM model with RBF kernel for circular decision boundary
+svm_model = SVC(kernel='rbf', C=1, gamma='auto')
+svm_model.fit(X, y)
+
+# Create a 3D plot for decision boundary
+def plot_3d_svm(X, y, model):
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection='3d')
+    
+    # Scatter plot of original data
+    ax.scatter(X[y == 0, 0], X[y == 0, 1], 0, color='blue', label="Class 0")
+    ax.scatter(X[y == 1, 0], X[y == 1, 1], 0, color='red', label="Class 1")
+    
+    # Generate grid for decision boundary plot
+    x = np.linspace(-2, 2, 50)
+    y = np.linspace(-2, 2, 50)
+    X1, X2 = np.meshgrid(x, y)
+    Z = model.decision_function(np.c_[X1.ravel(), X2.ravel()])
+    Z = Z.reshape(X1.shape)
+    
+    # Plot decision surface
+    ax.plot_surface(X1, X2, Z, color='green', alpha=0.3, edgecolor='none')
+    
+    ax.set_xlabel("Feature 1")
+    ax.set_ylabel("Feature 2")
+    ax.set_zlabel("Decision Boundary")
+    ax.set_title("2D SVM with Circular Data Distribution")
+    ax.legend()
+    
+    return fig
+
+# Streamlit deployment
+st.title("2D SVM Decision Boundary (Circular Data)")
+st.pyplot(plot_3d_svm(X, y, svm_model))
+Explanation of Changes:
+The plot_3d_svm function now accepts X, y, and model as parameters, so it can access the necessary data and the trained SVM model.
+When calling plot_3d_svm in the Streamlit app, we pass X, y, and svm_model as arguments.
+This should resolve the error. Try running this updated code in Streamlit.
+
+
+
+
+
+
+你說：
+final, problem3
+2D dataset 分布在feature plane上非圓形
+still give me python example, tks
+ChatGPT 說：
+ChatGPT
+記憶已更新
+Here’s an example of using a 2D SVM model with a dataset distributed in a non-circular shape on the feature plane. We'll use a dataset shaped like two interlocking half-moons.
+
+python
+複製程式碼
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.svm import SVC
+from sklearn.datasets import make_moons
+from mpl_toolkits.mplot3d import Axes3D
+import streamlit as st
+
+# Generate a non-circular (two half-moons) dataset
+X, y = make_moons(n_samples=200, noise=0.1, random_state=0)
+
+# Train SVM model with RBF kernel for non-linear separation
+svm_model = SVC(kernel='rbf', C=1, gamma='auto')
+svm_model.fit(X, y)
+
+# Create a 3D plot for decision boundary
+def plot_3d_svm(X, y, model):
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection='3d')
+    
+    # Scatter plot of original data
+    ax.scatter(X[y == 0, 0], X[y == 0, 1], 0, color='blue', label="Class 0")
+    ax.scatter(X[y == 1, 0], X[y == 1, 1], 0, color='red', label="Class 1")
+    
+    # Generate grid for decision boundary plot
+    x = np.linspace(-1.5, 2.5, 50)
+    y = np.linspace(-1, 1.5, 50)
+    X1, X2 = np.meshgrid(x, y)
+    Z = model.decision_function(np.c_[X1.ravel(), X2.ravel()])
+    Z = Z.reshape(X1.shape)
+    
+    # Plot decision surface
+    ax.plot_surface(X1, X2, Z, color='green', alpha=0.3, edgecolor='none')
+    
+    ax.set_xlabel("Feature 1")
+    ax.set_ylabel("Feature 2")
+    ax.set_zlabel("Decision Boundary")
+    ax.set_title("2D SVM with Non-Circular Data Distribution")
+    ax.legend()
+    
+    return fig
+
+# Streamlit deployment
+st.title("2D SVM Decision Boundary (Non-Circular Data)")
+st.pyplot(plot_3d_svm(X, y, svm_model))
+Explanation:
+Data Generation: The make_moons function generates a non-circular dataset shaped like two interlocking half-moons.
+SVM Training: An SVM model with an RBF kernel is used to classify the non-circular data.
+3D Plot: The decision boundary is visualized in 3D, with the z-axis representing the decision function value.
+Streamlit: The 3D plot is displayed in a Streamlit app.
+This example should help you visualize the SVM decision boundary on a dataset with a non-circular distribution. To run it, save the code to a file (e.g., svm_non_circular.py) and run:
+
+bash
+複製程式碼
+streamlit run svm_non_circular.py
+This will launch the Streamlit app where you can view the 3D decision boundary. Let me know if you need further adjustments!
